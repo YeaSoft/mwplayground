@@ -1,0 +1,3 @@
+[submodule "lib/MeisterWerk"]
+	path = lib/MeisterWerk
+	url = https://tuxpoldo@github.com/YeaSoft/MeisterWerk.git
