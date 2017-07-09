@@ -9,8 +9,13 @@
 
 // framework includes
 #include <MeisterWerk.h>
+#include <core/entity.h>
+#include <core/message.h>
+//#include <core/queue.h>
 
 using namespace meisterwerk;
+
+core::message testMsg;
 
 // application class
 class MyApp : public core::baseapp {
