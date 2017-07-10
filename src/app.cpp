@@ -13,17 +13,22 @@
 // framework includes
 #include <MeisterWerk.h>
 
-using namespace meisterwerk::core;
+using namespace meisterwerk;
 
 // led class
-class MyLed : public entity {
+class MyLed : public core::entity {
     public:
     unsigned long ledLastChange       = 0;
     unsigned long ledBlinkIntervallMs = 500;
+    uint8_t       pin                 = BUILTIN_LED;
     bool          state               = false;
 
-    MyLed() : entity( "led1" ) {
-        pinMode( LED_BUILTIN, OUTPUT );
+    MyLed( String _name, uint8_t _pin ) : core::entity( _name ) {
+        pin = _pin;
+    }
+
+    virtual void onSetup() {
+        pinMode( pin, OUTPUT );
     }
 
     virtual void onLoop( unsigned long ticker ) {
@@ -32,28 +37,29 @@ class MyLed : public entity {
             ledLastChange = ticker;
             if ( state ) {
                 state = false;
-                digitalWrite( LED_BUILTIN, HIGH );
+                digitalWrite( pin, HIGH );
             } else {
                 state = true;
-                digitalWrite( LED_BUILTIN, LOW );
+                digitalWrite( pin, LOW );
             }
         }
     }
 };
 
 // application class
-class MyApp : public baseapp {
+class MyApp : public core::baseapp {
     public:
     MyLed led1;
 
-    MyApp() : baseapp( "MyApp" ) {
+    public:
+    MyApp() : core::baseapp( "MyApp" ), led1( "led1", BUILTIN_LED ) {
     }
 
     virtual void onSetup() {
         // Debug console
         Serial.begin( 115200 );
 
-        led1.registerEntity( 50000, scheduler::PRIORITY_NORMAL );
+        led1.registerEntity( 50000, core::scheduler::PRIORITY_NORMAL );
     }
 };
 
