@@ -7,39 +7,53 @@
 // platform includes
 #include <ESP8266WiFi.h>
 
+// Let MeisterWerk output debugs on Serial
+#define DEBUG 1
+
 // framework includes
 #include <MeisterWerk.h>
 
-// for testing only...
-#include <core/entity.h>
-#include <core/message.h>
-#include <core/scheduler.h>
-//#include <core/queue.h>
+using namespace meisterwerk::core;
 
-using namespace meisterwerk;
+// led class
+class MyLed : public entity {
+    public:
+    unsigned long ledLastChange       = 0;
+    unsigned long ledBlinkIntervallMs = 500;
+    bool          state               = false;
 
-core::message   testMsg;
-core::scheduler testSched;
+    MyLed() : entity( "led1" ) {
+        pinMode( LED_BUILTIN, OUTPUT );
+    }
+
+    virtual void onLoop( unsigned long ticker ) {
+        unsigned long millis = ( ticker - ledLastChange ) / 1000L;
+        if ( millis >= ledBlinkIntervallMs ) {
+            ledLastChange = ticker;
+            if ( state ) {
+                state = false;
+                digitalWrite( LED_BUILTIN, HIGH );
+            } else {
+                state = true;
+                digitalWrite( LED_BUILTIN, LOW );
+            }
+        }
+    }
+};
 
 // application class
-class MyApp : public core::baseapp {
+class MyApp : public baseapp {
     public:
-    MyApp() {
+    MyLed led1;
+
+    MyApp() : baseapp( "MyApp" ) {
     }
 
-    ~MyApp() {
-    }
+    virtual void onSetup() {
+        // Debug console
+        Serial.begin( 115200 );
 
-    void onSetup() {
-        pinMode( LED_BUILTIN, OUTPUT );
-        delay( 1000 );
-    }
-
-    void onLoop() {
-        delay( 500 );
-        digitalWrite( LED_BUILTIN, LOW );
-        delay( 200 );
-        digitalWrite( LED_BUILTIN, HIGH );
+        led1.registerEntity( 50000, scheduler::PRIORITY_NORMAL );
     }
 };
 
