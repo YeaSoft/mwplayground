@@ -9,13 +9,17 @@
 
 // framework includes
 #include <MeisterWerk.h>
+
+// for testing only...
 #include <core/entity.h>
 #include <core/message.h>
+#include <core/scheduler.h>
 //#include <core/queue.h>
 
 using namespace meisterwerk;
 
-core::message testMsg;
+core::message   testMsg;
+core::scheduler testSched;
 
 // application class
 class MyApp : public core::baseapp {
