@@ -12,6 +12,8 @@
 
 // framework includes
 #include <MeisterWerk.h>
+#include <util/dumper.h>
+#include <util/messagespy.h>
 
 using namespace meisterwerk;
 
@@ -49,16 +51,20 @@ class MyLed : public core::entity {
 // application class
 class MyApp : public core::baseapp {
     public:
-    MyLed led1;
+    MyLed            led1;
+    util::messagespy spy;
+    util::dumper     dmp;
 
     public:
-    MyApp() : core::baseapp( "MyApp" ), led1( "led1", BUILTIN_LED ) {
+    MyApp() : core::baseapp( "MyApp" ), led1( "led1", BUILTIN_LED ), dmp( "dmp", 1 ) {
     }
 
     virtual void onSetup() {
         // Debug console
         Serial.begin( 115200 );
 
+        spy.registerEntity();
+        dmp.registerEntity();
         led1.registerEntity( 50000, core::scheduler::PRIORITY_NORMAL );
     }
 };
