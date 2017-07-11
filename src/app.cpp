@@ -12,6 +12,7 @@
 
 // framework includes
 #include <MeisterWerk.h>
+#include <thing/gpiopushbutton.h>
 #include <util/dumper.h>
 #include <util/messagespy.h>
 
@@ -51,12 +52,15 @@ class MyLed : public core::entity {
 // application class
 class MyApp : public core::baseapp {
     public:
-    MyLed            led1;
-    util::messagespy spy;
-    util::dumper     dmp;
+    MyLed                 led1;
+    util::messagespy      spy;
+    util::dumper          dmp;
+    thing::gpiopushbutton dbg;
 
     public:
-    MyApp() : core::baseapp( "MyApp" ), led1( "led1", BUILTIN_LED ), dmp( "dmp", 1 ) {
+    MyApp()
+        : core::baseapp( "MyApp" ), led1( "led1", BUILTIN_LED ), dmp( "dmp" ),
+          dbg( "dbg", D4, 1000, 5000 ) {
     }
 
     virtual void onSetup() {
@@ -65,6 +69,7 @@ class MyApp : public core::baseapp {
 
         spy.registerEntity();
         dmp.registerEntity();
+        dbg.registerEntity();
         led1.registerEntity( 50000, core::scheduler::PRIORITY_NORMAL );
     }
 };
