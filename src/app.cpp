@@ -95,6 +95,7 @@ class MyApp : public core::baseapp {
             // ask state and configuration
             publish( "btn1/getstate" );
             publish( "btn1/getconfig" );
+            publish( "dmp/getconfig" );
         }
     }
 
