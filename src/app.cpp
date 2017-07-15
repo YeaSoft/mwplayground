@@ -8,7 +8,7 @@
 #include <ESP8266WiFi.h>
 
 // Let MeisterWerk output debugs on Serial
-#define DEBUG 1
+#define _DEBUG 1
 
 // framework includes
 #include <MeisterWerk.h>
@@ -16,6 +16,7 @@
 #include <thing/pushbutton-GPIO.h>
 #include <util/dumper.h>
 #include <util/messagespy.h>
+#include <util/metronome.h>
 #include <util/timebudget.h>
 
 using namespace meisterwerk;
@@ -58,42 +59,50 @@ class MyApp : public core::baseapp {
     MyLed                  led1;
     util::messagespy       spy;
     util::dumper           dmp;
-    thing::pushbutton_GPIO dbg;
+    util::metronome        beat;
+    thing::pushbutton_GPIO btn1;
     thing::onoff_GPIO      relais1;
 
     public:
     MyApp()
-        : core::baseapp( "MyApp" ), led1( "led1", BUILTIN_LED, 500 ), dmp( "dmp" ),
-          dbg( "dbg", D4, 1000, 5000 ), relais1( "relais1", D3 ) {
+        : core::baseapp( "MyApp" ), led1( "led1", BUILTIN_LED, 500 ), dmp( "dmp", 0, "btn1" ),
+          btn1( "btn1", D4, 1000, 3000 ), relais1( "relais1", D3 ) {
     }
 
     virtual void onSetup() override {
         // Debug console
         Serial.begin( 115200 );
         // register myself
-        registerEntity();
+        registerEntity( 250000 );
 
         spy.registerEntity();
         dmp.registerEntity();
-        dbg.registerEntity();
+        btn1.registerEntity();
         led1.registerEntity( 50000 );
         relais1.registerEntity();
     }
 
     void onRegister() override {
-        subscribe( "dbg/short" );
-        subscribe( "dbg/long" );
-        subscribe( "dbg/extralong" );
+        subscribe( "btn1/short" );
+        subscribe( "btn1/long" );
+        subscribe( "btn1/extralong" );
+        // perform action all 10 seconds
+        beat = 10000;
     }
 
     void onLoop( unsigned long timer ) override {
+        if ( beat.beat() ) {
+            // ask state and configuration
+            publish( "btn1/getstate" );
+            publish( "btn1/getconfig" );
+        }
     }
 
     virtual void onReceive( String origin, String topic, String msg ) {
-        if ( topic == "dbg/short" ) {
+        if ( topic == "btn1/short" ) {
             publish( "relais1/toggle" );
-        } else if ( topic == "dbg/long" ) {
-            publish( "relais1/on", "{\"duration\":5}" );
+        } else if ( topic == "btn1/long" ) {
+            publish( "relais1/on", "{\"duration\":5000}" );
         }
     }
 };
