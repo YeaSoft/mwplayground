@@ -35,6 +35,7 @@ class MyLed : public core::entity {
     }
 
     virtual void onRegister() {
+        core::entity::onRegister();
         pinMode( pin, OUTPUT );
     }
 
@@ -51,6 +52,15 @@ class MyLed : public core::entity {
             }
         }
     }
+
+    virtual void onGetState( JsonObject &request, JsonObject &response ) override {
+        response["type"]  = "led";
+        response["state"] = state;
+    }
+
+    virtual bool onSetState( JsonObject &request, JsonObject &response ) override {
+        return false;
+    }
 };
 
 // application class
@@ -65,8 +75,8 @@ class MyApp : public core::baseapp {
 
     public:
     MyApp()
-        : core::baseapp( "MyApp" ), led1( "led1", BUILTIN_LED, 500 ), dmp( "dmp", 0, "btn1" ),
-          btn1( "btn1", D4, 1000, 3000 ), relais1( "relais1", D3 ) {
+        : led1( "led1", BUILTIN_LED, 500 ), dmp( "dmp", 0, "btn1" ), btn1( "btn1", D4, 1000, 3000 ),
+          relais1( "relais1", D3 ) {
     }
 
     virtual void onSetup() override {
@@ -86,20 +96,22 @@ class MyApp : public core::baseapp {
         subscribe( "btn1/short" );
         subscribe( "btn1/long" );
         subscribe( "btn1/extralong" );
-        // perform action all 10 seconds
-        beat = 10000;
+        // perform action all 15 seconds
+        beat = 15000;
     }
 
     void onLoop( unsigned long timer ) override {
         if ( beat.beat() ) {
             // ask state and configuration
+            publish( "spy/getstate" );
+            publish( "dmp/getstate" );
             publish( "btn1/getstate" );
-            publish( "btn1/getconfig" );
-            publish( "dmp/getconfig" );
+            publish( "relais1/getstate" );
         }
     }
 
-    virtual void onReceive( String origin, String topic, String msg ) {
+    virtual bool onReceive( String origin, String topic, JsonObject &request,
+                            JsonObject &response ) override {
         if ( topic == "btn1/short" ) {
             publish( "relais1/toggle" );
         } else if ( topic == "btn1/long" ) {
