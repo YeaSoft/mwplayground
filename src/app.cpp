@@ -115,10 +115,11 @@ class MyApp : public core::baseapp {
         }
     }
 
-    virtual bool onReceive( String origin, String topic, JsonObject &data ) override {
-        if ( topic == "btn1/short" ) {
+    virtual void onReceive( const char *origin, const char *topic, const char *msg ) override {
+        String t( topic );
+        if ( t == "btn1/short" ) {
             publish( "relais1/toggle" );
-        } else if ( topic == "btn1/long" ) {
+        } else if ( t == "btn1/long" ) {
             publish( "relais1/on", "{\"duration\":5000}" );
         }
     }
