@@ -12,8 +12,8 @@
 
 // framework includes
 #include <MeisterWerk.h>
-#include <thing/onoff-GPIO.h>
-#include <thing/pushbutton-GPIO.h>
+//#include <thing/onoff-GPIO.h>
+//#include <thing/pushbutton-GPIO.h>
 #include <util/dumper.h>
 #include <util/messagespy.h>
 #include <util/metronome.h>
@@ -29,8 +29,7 @@ class MyLed : public core::entity {
     uint8_t       pin                 = BUILTIN_LED;
     bool          state               = false;
 
-    MyLed( String name, uint8_t pin, unsigned long ledBlinkIntervallMs )
-        : core::entity( name ), pin{pin} {
+    MyLed( String name, uint8_t pin, unsigned long ledBlinkIntervallMs ) : core::entity( name ), pin{pin} {
         ledBlinkIntervallUs = ledBlinkIntervallMs * 1000;
     }
 
@@ -52,31 +51,37 @@ class MyLed : public core::entity {
             }
         }
     }
+    /*
+        virtual void onGetState( JsonObject &request, JsonObject &response ) override {
+            response["type"]  = "led";
+            response["state"] = state;
+        }
 
-    virtual void onGetState( JsonObject &request, JsonObject &response ) override {
-        response["type"]  = "led";
-        response["state"] = state;
-    }
-
-    virtual bool onSetState( JsonObject &request, JsonObject &response ) override {
-        return false;
-    }
+        virtual bool onSetState( JsonObject &request, JsonObject &response ) override {
+            return false;
+        }
+    */
 };
 
 // application class
 class MyApp : public core::baseapp {
     public:
-    MyLed                  led1;
-    util::messagespy       spy;
-    util::dumper           dmp;
-    util::metronome        beat;
-    thing::pushbutton_GPIO btn1;
-    thing::onoff_GPIO      relais1;
+    MyLed            led1;
+    util::messagespy spy;
+    util::dumper     dmp;
+    util::metronome  beat;
+    //    thing::pushbutton_GPIO btn1;
+    //    thing::onoff_GPIO      relais1;
 
     public:
+    /*
     MyApp()
         : led1( "led1", BUILTIN_LED, 500 ), dmp( "dmp", 0, "btn1" ), btn1( "btn1", D4, 1000, 3000 ),
           relais1( "relais1", D3 ) {
+    }
+    */
+
+    MyApp() : led1( "led1", BUILTIN_LED, 500 ), dmp( "dmp", 0, "btn1" ) {
     }
 
     virtual void onSetup() override {
@@ -87,9 +92,9 @@ class MyApp : public core::baseapp {
 
         spy.registerEntity();
         dmp.registerEntity();
-        btn1.registerEntity();
+        //        btn1.registerEntity();
         led1.registerEntity( 50000 );
-        relais1.registerEntity();
+        //        relais1.registerEntity();
     }
 
     void onRegister() override {
@@ -110,8 +115,7 @@ class MyApp : public core::baseapp {
         }
     }
 
-    virtual bool onReceive( String origin, String topic, JsonObject &request,
-                            JsonObject &response ) override {
+    virtual bool onReceive( String origin, String topic, JsonObject &data ) override {
         if ( topic == "btn1/short" ) {
             publish( "relais1/toggle" );
         } else if ( topic == "btn1/long" ) {
