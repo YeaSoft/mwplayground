@@ -12,8 +12,8 @@
 
 // framework includes
 #include <MeisterWerk.h>
-//#include <thing/onoff-GPIO.h>
-//#include <thing/pushbutton-GPIO.h>
+#include <thing/onoff-GPIO.h>
+#include <thing/pushbutton-GPIO.h>
 #include <util/dumper.h>
 #include <util/messagespy.h>
 #include <util/metronome.h>
@@ -63,27 +63,22 @@ class MyLed : public core::entity {
 // application class
 class MyApp : public core::baseapp {
     public:
-    MyLed            led1;
-    util::messagespy spy;
-    util::dumper     dmp;
-    util::metronome  beat;
-    //    thing::pushbutton_GPIO btn1;
-    //    thing::onoff_GPIO      relais1;
+    MyLed                  led1;
+    util::messagespy       spy;
+    util::dumper           dmp;
+    util::metronome        beat;
+    thing::pushbutton_GPIO btn1;
+    thing::onoff_GPIO      relais1;
 
     public:
-    /*
     MyApp()
-        : led1( "led1", BUILTIN_LED, 500 ), dmp( "dmp", 0, "btn1" ), btn1( "btn1", D4, 1000, 3000 ),
-          relais1( "relais1", D3 ) {
-    }
-    */
-
-    MyApp() : core::baseapp( "app", 250000 ), led1( "led1", BUILTIN_LED, 500 ), dmp( "dmp", 0, "btn1" ) {
+        : core::baseapp( "app", 250000 ), led1( "led1", BUILTIN_LED, 500 ), dmp( "dmp", 0, "btn1" ),
+          btn1( "btn1", D4, 1000, 3000 ), relais1( "relais1", D3 ) {
     }
 
     virtual void setup() override {
-        //        btn1.registerEntity();
-        //        relais1.registerEntity();
+        // Initialize debug console
+        Serial.begin( _MW_SERIAL_SPEED );
 
         subscribe( "btn1/short" );
         subscribe( "btn1/long" );
