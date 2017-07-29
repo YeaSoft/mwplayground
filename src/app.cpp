@@ -28,7 +28,7 @@ class MyLed : public core::entity {
     uint8_t         pin               = BUILTIN_LED;
     bool            state             = false;
 
-    MyLed( String name, uint8_t pin, unsigned long ledBlinkIntervallMs ) : core::entity( name ), pin{pin} {
+    MyLed( String name, uint8_t pin, unsigned long ledBlinkIntervallMs ) : core::entity( name, 50000 ), pin{pin} {
         ledBlinkIntervall = ledBlinkIntervallMs;
     }
 
@@ -82,10 +82,7 @@ class MyApp : public core::baseapp {
     }
 
     virtual void setup() override {
-        spy.registerEntity();
-        dmp.registerEntity();
         //        btn1.registerEntity();
-        led1.registerEntity( 50000 );
         //        relais1.registerEntity();
 
         subscribe( "btn1/short" );
