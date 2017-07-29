@@ -8,7 +8,7 @@
 #include <ESP8266WiFi.h>
 
 // Let MeisterWerk output debugs on Serial
-#define _DEBUG 1
+#define _MW_DEBUG 1
 
 // framework includes
 #include <MeisterWerk.h>
@@ -24,24 +24,21 @@ using namespace meisterwerk;
 // led class
 class MyLed : public core::entity {
     public:
-    unsigned long ledLastChange       = 0;
-    unsigned long ledBlinkIntervallUs = 500000L;
-    uint8_t       pin                 = BUILTIN_LED;
-    bool          state               = false;
+    util::metronome ledBlinkIntervall = 500;
+    uint8_t         pin               = BUILTIN_LED;
+    bool            state             = false;
 
     MyLed( String name, uint8_t pin, unsigned long ledBlinkIntervallMs ) : core::entity( name ), pin{pin} {
-        ledBlinkIntervallUs = ledBlinkIntervallMs * 1000;
+        ledBlinkIntervall = ledBlinkIntervallMs;
     }
 
-    virtual void onRegister() {
-        core::entity::onRegister();
+    virtual void setup() {
+        core::entity::setup();
         pinMode( pin, OUTPUT );
     }
 
-    virtual void onLoop( unsigned long ticker ) {
-        unsigned long micros = util::timebudget::delta( ledLastChange, ticker );
-        if ( micros >= ledBlinkIntervallUs ) {
-            ledLastChange = ticker;
+    virtual void loop() {
+        if ( ledBlinkIntervall.beat() ) {
             if ( state ) {
                 state = false;
                 digitalWrite( pin, HIGH );
@@ -81,23 +78,16 @@ class MyApp : public core::baseapp {
     }
     */
 
-    MyApp() : led1( "led1", BUILTIN_LED, 500 ), dmp( "dmp", 0, "btn1" ) {
+    MyApp() : core::baseapp( "app", 250000 ), led1( "led1", BUILTIN_LED, 500 ), dmp( "dmp", 0, "btn1" ) {
     }
 
-    virtual void onSetup() override {
-        // Debug console
-        Serial.begin( 115200 );
-        // register myself
-        registerEntity( 250000 );
-
+    virtual void setup() override {
         spy.registerEntity();
         dmp.registerEntity();
         //        btn1.registerEntity();
         led1.registerEntity( 50000 );
         //        relais1.registerEntity();
-    }
 
-    void onRegister() override {
         subscribe( "btn1/short" );
         subscribe( "btn1/long" );
         subscribe( "btn1/extralong" );
@@ -105,7 +95,7 @@ class MyApp : public core::baseapp {
         beat = 15000;
     }
 
-    void onLoop( unsigned long timer ) override {
+    void loop() override {
         if ( beat.beat() ) {
             // ask state and configuration
             publish( "spy/getstate" );
@@ -115,7 +105,7 @@ class MyApp : public core::baseapp {
         }
     }
 
-    virtual void onReceive( const char *origin, const char *topic, const char *msg ) override {
+    virtual void receive( const char *origin, const char *topic, const char *msg ) override {
         String t( topic );
         if ( t == "btn1/short" ) {
             publish( "relais1/toggle" );
