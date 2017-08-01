@@ -48,16 +48,6 @@ class MyLed : public core::entity {
             }
         }
     }
-    /*
-        virtual void onGetState( JsonObject &request, JsonObject &response ) override {
-            response["type"]  = "led";
-            response["state"] = state;
-        }
-
-        virtual bool onSetState( JsonObject &request, JsonObject &response ) override {
-            return false;
-        }
-    */
 };
 
 // application class
@@ -89,11 +79,8 @@ class MyApp : public core::baseapp {
 
     void loop() override {
         if ( beat.beat() ) {
-            // ask state and configuration
-            publish( "spy/getstate" );
-            publish( "dmp/getstate" );
-            publish( "btn1/getstate" );
-            publish( "relais1/getstate" );
+            // ask info
+            publish( "info" );
         }
     }
 
