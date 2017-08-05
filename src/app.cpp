@@ -12,8 +12,10 @@
 
 // framework includes
 #include <MeisterWerk.h>
+#include <base/i2cbus.h>
 #include <thing/onoff-GPIO.h>
 #include <thing/pushbutton-GPIO.h>
+#include <thing/temp-hum-DHT.h>
 #include <util/dumper.h>
 #include <util/messagespy.h>
 #include <util/metronome.h>
@@ -22,18 +24,18 @@
 using namespace meisterwerk;
 
 // led class
-class MyLed : public core::entity {
+class MyLed : public core::jentity {
     public:
     util::metronome ledBlinkIntervall = 500;
     uint8_t         pin               = BUILTIN_LED;
     bool            state             = false;
 
-    MyLed( String name, uint8_t pin, unsigned long ledBlinkIntervallMs ) : core::entity( name, 50000 ), pin{pin} {
+    MyLed( String name, uint8_t pin, unsigned long ledBlinkIntervallMs ) : core::jentity( name, 50000 ), pin{pin} {
         ledBlinkIntervall = ledBlinkIntervallMs;
     }
 
     virtual void setup() {
-        core::entity::setup();
+        core::jentity::setup();
         pinMode( pin, OUTPUT );
     }
 
@@ -48,6 +50,14 @@ class MyLed : public core::entity {
             }
         }
     }
+
+    virtual void onGetValue( String value, JsonObject &params, JsonObject &data ) override {
+        if ( value == "info" ) {
+            data["type"]  = "led";
+            data["state"] = state;
+            notify( value, data );
+        }
+    }
 };
 
 // application class
@@ -59,11 +69,15 @@ class MyApp : public core::baseapp {
     util::metronome        beat;
     thing::pushbutton_GPIO btn1;
     thing::onoff_GPIO      relais1;
+    base::i2cbus           i2c;
+    thing::dht             dht1;
 
     public:
     MyApp()
         : core::baseapp( "app", 250000 ), led1( "led1", BUILTIN_LED, 500 ), dmp( "dmp", 0, "btn1" ),
-          btn1( "btn1", D4, 1000, 3000 ), relais1( "relais1", D3 ) {
+          btn1( "btn1", D4, 1000, 3000 ), relais1( "relais1", D3 ), i2c( "i2cbus", D2, D1 ),
+          dht1( "dht", "AM2302", D5 ) {
+        dht1.bOnlyValidTIme = false;
     }
 
     virtual void setup() override {
@@ -80,7 +94,9 @@ class MyApp : public core::baseapp {
     void loop() override {
         if ( beat.beat() ) {
             // ask info
-            publish( "info" );
+            // publish( "info/get" );
+            // publish( "temperature/get" );
+            // publish( "humidity/get" );
         }
     }
 
@@ -90,6 +106,7 @@ class MyApp : public core::baseapp {
             publish( "relais1/toggle" );
         } else if ( t == "btn1/long" ) {
             publish( "relais1/on", "{\"duration\":5000}" );
+            publish( "info/get" );
         }
     }
 };
