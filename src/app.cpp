@@ -77,7 +77,7 @@ class MyApp : public core::baseapp {
         : core::baseapp( "app", 250000 ), led1( "led1", BUILTIN_LED, 500 ), dmp( "dmp", 0, "btn1" ),
           btn1( "btn1", D4, 1000, 3000 ), relais1( "relais1", D3 ), i2c( "i2cbus", D2, D1 ),
           dht1( "dht", "AM2302", D5 ) {
-        dht1.bOnlyValidTIme = false;
+        dht1.bOnlyValidTime = false;
     }
 
     virtual void setup() override {
