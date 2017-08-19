@@ -16,6 +16,7 @@
 #include <thing/luminosity-TSL2561.h>
 #include <thing/onoff-GPIO.h>
 #include <thing/pushbutton-GPIO.h>
+#include <thing/signallight-GPIO.h>
 #include <thing/temp-hum-DHT.h>
 #include <util/dumper.h>
 #include <util/messagespy.h>
@@ -64,21 +65,22 @@ class MyLed : public core::jentity {
 // application class
 class MyApp : public core::baseapp {
     public:
-    MyLed                  led1;
-    util::messagespy       spy;
-    util::dumper           dmp;
-    util::metronome        beat;
-    base::i2cbus           i2c;
-    thing::pushbutton_GPIO btn1;
-    thing::onoff_GPIO      relais1;
-    thing::dht             dht;
-    thing::tsl2561         tsl;
+    MyLed                   led1;
+    util::messagespy        spy;
+    util::dumper            dmp;
+    util::metronome         beat;
+    base::i2cbus            i2c;
+    thing::pushbutton_GPIO  btn1;
+    thing::signallight_GPIO led2;
+    thing::onoff_GPIO       relais1;
+    thing::dht              dht;
+    thing::tsl2561          tsl;
 
     public:
     MyApp()
         : core::baseapp( "app", 250000 ), led1( "led1", BUILTIN_LED, 500 ), dmp( "dmp", 0, "btn1" ),
           btn1( "btn1", D4, 1000, 3000 ), relais1( "relais1", D3 ), i2c( "i2cbus", D2, D1 ), dht( "dht", "AM2302", D5 ),
-          tsl( "tsl", 57 ) {
+          tsl( "tsl", 57 ), led2( "led2", false, D6 ) {
         dht.bOnlyValidTime = false;
         tsl.bOnlyValidTime = false;
     }
@@ -107,6 +109,7 @@ class MyApp : public core::baseapp {
         String t( topic );
         if ( t == "btn1/short" ) {
             publish( "relais1/toggle" );
+            publish( "led2/toggle" );
         } else if ( t == "btn1/long" ) {
             publish( "relais1/on", "{\"duration\":5000}" );
             publish( "info/get" );
